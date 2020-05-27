@@ -4,17 +4,17 @@
 #include <Adafruit_FXAS21002C.h>
 #include <math.h>
 
-//#define Serial SerialUSB
+//#define Serial SerialUSB //if using Qwiic micro board
 #define PI 3.1416
+
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_FXOS8700 accelmag = Adafruit_FXOS8700(0x8700A, 0x8700B);
 Adafruit_FXAS21002C gyro = Adafruit_FXAS21002C(0x0021002C);
 
 float AX, AY, AZ, GX, GY, GZ, MX, MY, MZ;
-float rho, posi;  float posiF, posiOld = 0; float rhoF, rhoOld = 0;
-float MagAccel3D, MagAccel2D;
-int WarningValue = 2; //dps avg:3 single: 10-15
-int ErrorValue = 4; //dps single: 45
+float rho, posi;  float posiF, posiOld = 0, rhoF, rhoOld = 0;
+float acc_3D;
+
 void displaySensorDetails(void)
 {
   sensor_t accel, sensor , mag;
@@ -95,24 +95,6 @@ void loop(void)
   accelmag.getEvent(&aevent, &mevent);
   gyro.getEvent(&gevent);
 
-//  /* Display the accel results (acceleration is measured in m/s^2) */
-//  Serial.print("A ");
-//  Serial.print("X: "); Serial.print(aevent.acceleration.x, 4); Serial.print("  ");
-//  Serial.print("Y: "); Serial.print(aevent.acceleration.y, 4); Serial.print("  ");
-//  Serial.print("Z: "); Serial.print(aevent.acceleration.z, 4); Serial.print("  ");
-//  Serial.println("m/s^2");
-//
-//  /* Display the mag results (mag data is in uTesla) */
-//  Serial.print("M ");
-//  Serial.print("X: "); Serial.print(mevent.magnetic.x, 1); Serial.print("  ");
-//  Serial.print("Y: "); Serial.print(mevent.magnetic.y, 1); Serial.print("  ");
-//  Serial.print("Z: "); Serial.print(mevent.magnetic.z, 1); Serial.print("  ");
-//  Serial.println("uT");
-//
-//  Serial.println("");
-//
-//  delay(500);
-
   AX = aevent.acceleration.x;
   AY = aevent.acceleration.y;
   AZ = aevent.acceleration.z;
@@ -125,7 +107,7 @@ void loop(void)
   MY = mevent.magnetic.y;
   MZ = mevent.magnetic.z;
 
-  MagAccel3D = sqrt(sq(AX) + sq(AY) + sq(AZ)); // should be almost 1g for code to work. No linear acceleration
+  acc_3D = sqrt(sq(AX) + sq(AY) + sq(AZ)); // should be almost 1g for code to work. No linear acceleration
 
 
     /* Display the accel results (acceleration is measured in m/s^2) */
@@ -133,6 +115,8 @@ void loop(void)
   Serial.print(AY); Serial.print(",");
   Serial.print(AZ); Serial.print(",");
 
+
+    /* Display the gyro results (angular velocity is measured in dps) */
   Serial.print(GX); Serial.print(",");
   Serial.print(GY); Serial.print(",");
   Serial.print(GZ); Serial.print(",");
@@ -143,17 +127,17 @@ void loop(void)
   Serial.print(MY); Serial.print(",");
   Serial.print(MZ); Serial.print(",");
   
-  bool ID[8] = {0,0,0,0,0,0,0,0};
-  if (abs(GX)>WarningValue) { ID[7] = 1; }
-  if (abs(GY)>WarningValue) { ID[6] = 1; } 
-  if (abs(GZ)>WarningValue) { ID[5] = 1; } 
-  if (abs(GX)>ErrorValue) { ID[4] = 1; }
-  if (abs(GY)>ErrorValue) { ID[3] = 1; } 
-  if (abs(GZ)>ErrorValue) { ID[2] = 1; }
-  byte gyroFlag = 0;
-  for (int i=0; i<8; i++) {
-    gyroFlag |= ID[i] << i;
-  }
+//  bool ID[8] = {0,0,0,0,0,0,0,0};
+//  if (abs(GX)>WarningValue) { ID[7] = 1; }
+//  if (abs(GY)>WarningValue) { ID[6] = 1; } 
+//  if (abs(GZ)>WarningValue) { ID[5] = 1; } 
+//  if (abs(GX)>ErrorValue) { ID[4] = 1; }
+//  if (abs(GY)>ErrorValue) { ID[3] = 1; } 
+//  if (abs(GZ)>ErrorValue) { ID[2] = 1; }
+//  byte gyroFlag = 0;
+//  for (int i=0; i<8; i++) {
+//    gyroFlag |= ID[i] << i;
+//  }
 
   Serial.print(micros());  
 //  Serial.print(gyroFlag,BIN); 
